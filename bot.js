@@ -1,17 +1,7 @@
-const Twit = require('twit')
 const fs = require('fs');
 const Promise = require('bluebird')
-const dotenv = require("dotenv");
-const { Console } = require('console');
-dotenv.config()
-
-const T = new Twit({
-    consumer_key: "eMy9Z39XlbTvawx1Q6DQnhTKp",
-    consumer_secret: "65DJvZi4LA8rSWbNxW9PFASxT3qQGcZjFKx0FTLc5wm6aq3e5N",
-    access_token: "1458460832099078145-HUBHKUeFhV3XIDcpER7TUSbaapUMjy",
-    access_token_secret: "2lSlBh5ct4yVEPLtfam6yTy8Pk1LtMsitn4tWCPyQpCuS"
-})
-
+const { auth } = require('./config/config.js');
+const T = auth();
 var stream = T.stream('statuses/filter', { track: 'wen reveal', language: 'en' })
 
 
@@ -30,6 +20,7 @@ const initMediaUpload = (client, pathToFile) => {
                 console.log(error)
                 reject(error)   
             } else {
+                console.log("Initialized Media Upload")
                 resolve(data.media_id_string)
             }
         })
@@ -38,7 +29,6 @@ const initMediaUpload = (client, pathToFile) => {
 
 const appendMedia = (client, mediaId, pathToFile) => {
     const mediaData = fs.readFileSync(pathToFile, { encoding: 'base64' })
-    console.log(mediaData)
     return new Promise((resolve, reject) => {
         client.post("media/upload", {
             command: "APPEND",
@@ -46,12 +36,11 @@ const appendMedia = (client, mediaId, pathToFile) => {
             media_data: mediaData,
             segment_index: 0
         }, (error, data, response) => { 
-            console.log("2")    
             if (error) {
                 console.log(error)
                 reject(error)   
             } else {
-                console.log(mediaId)
+                console.log("Appended Media")    
                 resolve(mediaId)
             }
         })
@@ -59,7 +48,6 @@ const appendMedia = (client, mediaId, pathToFile) => {
 }
 
 const finalizeMediaUpload = (client, mediaId) => {
-    console.log("3")
     return new Promise((resolve, reject) =>  {
         client.post("media/upload", {
             command: "FINALIZE",
@@ -69,6 +57,7 @@ const finalizeMediaUpload = (client, mediaId) => {
                 console.log(error)
                 reject(error)
             } else {
+                console.log("Finalized Media")
                 resolve(mediaId)
             }
         })
@@ -76,7 +65,7 @@ const finalizeMediaUpload = (client, mediaId) => {
 }
 
 stream.on('tweet', async function (tweet) {
-    console.log("0")
+    console.log("Starting RKO Reply Tweet")
     postReplyWithMedia(T,"./media/rko.gif",tweet)
 
 })
@@ -99,7 +88,7 @@ const postReplyWithMedia = (client, mediaFilePath, replyTweet) => {
                 if (error) {
                     console.log(error);
                 }
-
+                console.log(`Successfully Replied to ${replyTweet.user.screen_name}`)
                 //print the text of the tweet we sent out
                 console.log(tweetReply.text);
             });
