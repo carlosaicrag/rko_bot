@@ -2,7 +2,7 @@ const fs = require('fs');
 const Promise = require('bluebird')
 const { auth } = require('./config/config.js');
 const T = auth();
-var stream = T.stream('statuses/filter', { track: '@smilesssvrs reveal', language: 'en' })
+var stream = T.stream('statuses/filter', { track: 'wen reveal', language: 'en' })
 
 
 // media upload methods
